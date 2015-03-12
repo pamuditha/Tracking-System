@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Admin Panel-Add admins</title>
+
+	<!---------- CSS ------------>
+	<link rel="stylesheet" type="text/css" href="./static/style_reg.css">
+
+</head>
+
+<body>
+
+    <!--start signup-form -->
+    <div id="signup-form">
+        
+        <!--BEGIN #subscribe-inner -->
+        <div id="signup-inner">
+        
+        	<div class="clearfix" id="header">
+        	
+        		
+        
+                <h1>Admin Panel-Add admins </h1>
+				
+            
+			</div>
+			
+            <form method="post" action="register">
+            	
+                <p>
+
+                <label for="name">Name *</label>
+                <input id="name" type="text" name="name" required="required" value="" placeholder="Name">
+                </p>
+                
+                <p>
+                <label for="Password">Password *</label>
+                <input pattern=".{4,10}" type="password" name="password" id="pass1" required title="required 4 to 10 characters"  value="" placeholder="Password">
+                </p>
+                <p>
+				<label for="">Repeat Password *</label>
+				<input type="password" name="confirm" id="pass2" class="form-control" required="required" onkeyup="checkPass(); return false;" title=""placeholder="Repeat Password">
+				<span id="confirmMessage" class="confirmMessage"></span>
+				</P>
+				<p>
+				<label for="">Phone number *</label>
+				<input type="tel" name="tel" id="tel" required="required" placeholder="Phone number">
+				</p>
+                <p>
+
+                <label for="email">Email *</label>
+                <input id="email" type="email" name="email" required="required" value=""placeholder="E-mail">
+                </p>
+              
+			  
+                <p>
+
+                <button id="submit" type="submit">Submit</button>
+                </p>
+                
+            </form>
+            {% for message in get_flashed_messages() %}
+			  <font color="red" size="3">{{ message }}</font>
+            {% endfor %}
+		<div id="required">
+		<p>* Required Fields<br/>
+		</p>
+		</div>
+
+
+            </div>
+        
+        <!--end signup-inner -->
+        </div>
+        
+    <!--end signup-form -->   
+    </div>
+
+</body>
+<script type="text/javascript">
+function checkPass()
+{
+    
+    var pass1 = document.getElementById('pass1');
+    var pass2 = document.getElementById('pass2');
+    
+    var message = document.getElementById('confirmMessage');
+    
+    var goodColor = "#66cc66";
+    var badColor = "#ff6666";
+    
+    if(pass1.value == pass2.value){
+       
+        <!--pass2.style.backgroundColor = goodColor;-->
+        message.style.color = goodColor;
+        message.innerHTML = "Passwords Match!"
+    }else{
+      
+       <!-- pass2.style.backgroundColor = badColor;-->
+        message.style.color = badColor;
+        message.innerHTML = "Passwords Do Not Match!"
+    }
+}  
+</script>
+</html>

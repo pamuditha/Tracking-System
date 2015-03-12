@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Home</title>
+<link rel="stylesheet" type="text/css" href="static/style.css"/>
+<link rel="stylesheet" type="text/css" href="static/demo.css"/>
+<link rel="stylesheet" type="text/css" href="static/tables.css"/>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+  
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+ <script src="static/JavaScrpits/amcharts.js" type="text/javascript"></script>
+ <script src="static/JavaScrpits/serial.js" type="text/javascript"></script>
+   <script src="static/JavaScrpits/pie.js" type="text/javascript"></script>
+    <script type="text/javascript" src="http://www.amcharts.com/lib/3/themes/none.js"></script>
+   <script src="http://maps.google.com/maps/api/js?v=3.2&sensor=false"></script>
+ 
+<script type="text/javascript" src="static/JavaScrpits/highlight.pack.js"></script>
+<!--<script type="text/javascript" src="static/JavaScrpits/jquery.cookie.js"></script>-->
+<script type="text/javascript" src="static/JavaScrpits/jquery.collapsible.js"></script>
+
+<!-- madhura headers-->
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+    <script language="javascript" src="static/JavaScrpits/leaflet-google.js" type="text/javascript" ></script>
+	<script language="javascript" src="static/JavaScrpits/Polyline.encoded.js" type="text/javascript" ></script>
+
+     <!--initiate accordion-->
+<script type="text/javascript">
+	 var name="{{name1}}";
+
+	function load(){
+		if (name!="Madmin"){
+			$("#add").hide();
+			$("#view").hide();
+		}
+	}
+	load();
+	 var chart,chartCursor,ele1;	
+     var chartData = [];
+	 
+	  var trafficAvrage=0;
+      var totTraffic=0;
+      var key=0;
+	 
+	 function lineGraph(){
+        //div  clear
+        
+		$( ".map_panel" ).empty();
+ 
+        chart = new AmCharts.AmSerialChart();
+        chart.pathToImages = "static/images/graphImages/";  
+        chart.dataProvider = chartData;
+        chart.categoryField = "Date";
+        chart.dataDateFormat = "YYYY-MM-DD";
+				
+	    
+	    
+             // AXES
+            // category
+        var categoryAxis = chart.categoryAxis;
+        categoryAxis.parseDates = true; // as our data is date-based trafffic, we set parseDates to true
+        categoryAxis.minPeriod = "DD"; // our data is daily, so we set minPeriod to DD 
+        categoryAxis.dashLength = 1;
+        categoryAxis.gridAlpha = 0.15;
+        categoryAxis.axisColor = "#DADADA";
+				
+	     
+
+             // value
+          var valueAxis = new AmCharts.ValueAxis();
+          valueAxis.axisColor = "#DADADA";
+          valueAxis.dashLength = 1;
+          valueAxis.logarithmic = true; // this line makes axis logarithmic
+          chart.addValueAxis(valueAxis);
+				
+           
+		   
+
+              // GUIDE for average
+            var guide = new AmCharts.Guide();
+            guide.value = trafficAvrage;
+            guide.lineColor = "#CC0000";
+            guide.dashLength = 4;
+            guide.label = "Traffic average";
+            guide.inside = true;
+            guide.lineAlpha = 1;
+            valueAxis.addGuide(guide);
+				
+		 
+
+
+             // GRAPH
+             var graph = new AmCharts.AmGraph();
+             graph.type = "smoothedLine";
+             graph.bullet = "round";
+             graph.bulletColor = "#FFFFFF";
+             graph.useLineColorForBulletBorder = true;
+             graph.bulletBorderAlpha = 1;
+             graph.bulletBorderThickness = 2;
+             graph.bulletSize = 7;
+             graph.title = "Row Traffic";
+             graph.valueField = "traffic_count";
+             graph.lineThickness = 2;
+             graph.lineColor = "#00BBCC";
+             chart.addGraph(graph);
+				
+		   
+
+               // CURSOR
+             var chartCursor = new AmCharts.ChartCursor();
+             chartCursor.cursorPosition = "mouse";
+             chart.addChartCursor(chartCursor);
+				
+		      
+                // SCROLLBAR
+                var chartScrollbar = new AmCharts.ChartScrollbar();
+                chartScrollbar.graph = graph;
+                chartScrollbar.scrollbarHeight = 30;
+                chart.addChartScrollbar(chartScrollbar);
+
+                chart.creditsPosition = "bottom-right";
+				
+				 
+
+                // WRITE
+               //chart.write("map");
+				
+			 
+  
+     
+            
+		 var geocoder = new google.maps.Geocoder();
+         var address = document.getElementById("line_location").value;
+         
+         geocoder.geocode( { 'address': address}, function(results, status) {
+         if (status == google.maps.GeocoderStatus.OK) {
+         
+		 
+        	 
+		 var latitiude=results[0].geometry.location.lat();
+		 var longitiude=results[0].geometry.location.lng();
+		 
+		 
+		   
+         
+		 
+		 //url creation
+		 
+		 var url="/adminpanel/trafficbydate?lat="+latitiude+"&lon="+longitiude;
+		 
+		 
+  
+  
+  
+  
+  
+  
+		 
+		
+		 $.getJSON(url,function(result){
+		 
+			 chartData=[];
+			  
+			 if ( result.result_dateByTraffic.length == 0 ) {
+			        alert("No  Data Found our System")
+			    }else{
+			 
+			for(key in result.result_dateByTraffic){
+			  
+					ele1={
+					"Date": result.result_dateByTraffic[key].date,
+					"traffic_count": result.result_dateByTraffic[key].count,
+					 
+					 
+					
+				};
+				
+				
+				totTraffic+=result.result_dateByTraffic[key].count;
+				
+				 
+			   chartData.push(ele1);
+			}
+			key++;
+			trafficAvrage=totTraffic/(key);
+			
+			 
+			 guide.value = trafficAvrage;
+			 chart.dataProvider = chartData;
+			
+			 
+			 chart.write("map");
+			 
+			 //adiing data to graph 
+			 chartData.validateData();
+			 
+			 
+		 }
+            });
+		  
+			 
+      } else {
+       alert("Invalid Location typing,this not in google map : " + status);
+     }
+    }); 
+	   
+	   
+	   
+	   
+    } 
+	 
+	 
+	  
+	 
+	 
+</script>	
+	 
+<script>	
+   
+	  var pie_chart,pie_ele;
+	  var pie_chartData = [];
+ 
+     
+               
+            
+
+ 
+ 
+ 
+	function registerd_PhoneModels(){
+	
+	     
+                // PIE CHART
+                pie_chart = new AmCharts.AmPieChart();
+
+                // title of the chart
+                pie_chart.addTitle("Registered Phone Model",16);
+
+                pie_chart.dataProvider = pie_chartData;
+                pie_chart.titleField = "Phone_Model";
+                pie_chart.valueField = "no_of_phone";
+                pie_chart.sequencedAnimation = true;
+                pie_chart.startEffect = "elastic";
+                pie_chart.innerRadius = "30%";
+                pie_chart.startDuration = 1;
+                pie_chart.labelRadius = 15;
+                pie_chart.balloonText = "[[title]]<br><span style='font-size:14px'><b>[[value]]</b> ([[percents]]%)</span>";
+                // the following two lines makes the chart 3D
+                pie_chart.depth3D = 10;
+                pie_chart.angle = 15;
+
+                // WRITE                                 
+                pie_chart.write("map");
+          
+	
+		 
+		 var url="/adminpanel/modelcounts";
+		 
+		 $.getJSON(url,function(result){
+			pie_chartData=[];
+			pie_chart.dataProvider = pie_chartData;
+			 
+			  if ( result.totresults.length == 0 ) {
+			        alert("No  Data Found our System")
+			    }else{
+			
+			
+			for(var key in result.totresults){
+				
+				 pie_ele={
+					"Phone_Model": result.totresults[key].model,
+					"no_of_phone": result.totresults[key].count,
+					 
+					 
+				};
+			   pie_chartData.push(pie_ele);
+			}
+			 
+			 
+			
+			  
+			pie_chart.validateData();
+			 }
+			
+            });
+		 
+		  
+	}
+ 
+	
+
+	
+	
+</script>	
+	
+	
+
+<script>
+
+   
+
+   var log_chart,log_ele;
+   var log_chartData = [];
+   var key=0;
+   
+    
+
+  function BarGraph() {
+                $( ".map_panel" ).empty();
+ 
+		        // SERIAL CHART
+                log_chart = new AmCharts.AmSerialChart();
+                log_chart.dataProvider = log_chartData;
+                log_chart.categoryField = "Date";
+                log_chart.startDuration = 1;
+				
+				 
+
+                // AXES
+                // category
+                var categoryAxis = log_chart.categoryAxis;
+                categoryAxis.labelRotation = 45; // this line makes category values to be rotated
+                categoryAxis.gridAlpha = 0;
+                categoryAxis.fillAlpha = 1;
+                categoryAxis.fillColor = "#FAFAFA";
+                categoryAxis.gridPosition = "start";
+			 
+
+                // value
+                var valueAxis = new AmCharts.ValueAxis();
+                valueAxis.dashLength = 5;
+                valueAxis.title = "Total Traffic of Each Day";
+                valueAxis.axisAlpha = 0;
+                log_chart.addValueAxis(valueAxis);
+				
+				 
+
+                // GRAPH
+                var graph = new AmCharts.AmGraph();
+                graph.valueField = "traffic_count";
+                graph.colorField = "color";
+                graph.balloonText = "<b>[[category]]: [[value]]</b>";
+                graph.type = "column";
+                graph.lineAlpha = 0;
+                graph.fillAlphas = 1;
+                log_chart.addGraph(graph);
+				
+				 
+
+                // CURSOR
+                chartCursor = new AmCharts.ChartCursor();
+                chartCursor.cursorAlpha = 0;
+                chartCursor.zoomable = false;
+                chartCursor.categoryBalloonEnabled = false;
+                log_chart.addChartCursor(chartCursor);
+
+                log_chart.creditsPosition = "top-right";
+				
+				 
+                
+              
+				
+				 
+
+
+   
+  
+        var geocoder = new google.maps.Geocoder();
+       var address = document.getElementById("location").value;
+    
+    geocoder.geocode( { 'address': address}, function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+         
+		 
+		 var latitiude=results[0].geometry.location.lat();
+		 var longitiude=results[0].geometry.location.lng();
+		 
+		 var url="/adminpanel/trafficbydate?lat="+latitiude+"&lon="+longitiude;
+		 
+		 $.getJSON(url,function(result){
+		 
+			 log_chartData=[];
+			 
+			 
+			 if (result.result_dateByTraffic.length == 0 ){
+				 
+				alert("No  Data Found our System")
+				 
+			 }else{
+			 
+			for(key in result.result_dateByTraffic){
+			  
+					log_ele={
+					"Date": result.result_dateByTraffic[key].date,
+					"traffic_count": result.result_dateByTraffic[key].count,
+					"color": "#9ACD32",
+					 
+					
+				};
+				
+				
+				 
+			   log_chartData.push(log_ele);
+			}
+			 
+			
+			 
+			 log_chart.dataProvider = log_chartData;
+			 //write
+			log_chart.write("map");
+			log_chartData.validateData();
+		    
+		    
+			 }
+            });
+		  
+			 
+      } else {
+       alert("Invalid Location typing,this not in google map : " + status);
+     }
+    }); 
+	}
+
+</script>	
+	
+<script>
+ 
+     
+   var bargraph_chart,bargraph_ele;
+   var bargraph_chartData = [];
+   var key=0;
+   
+    
+
+  function BarGraphwithSpecficCondition() {
+                $( ".map_panel" ).empty();
+ 
+		        // SERIAL CHART
+                bargraph_chart = new AmCharts.AmSerialChart();
+                bargraph_chart.dataProvider = log_chartData;
+                bargraph_chart.categoryField = "Date";
+                bargraph_chart.startDuration = 1;
+				
+				 
+
+                // AXES
+                // category
+                var categoryAxis = bargraph_chart.categoryAxis;
+                categoryAxis.labelRotation = 45; // this line makes category values to be rotated
+                categoryAxis.gridAlpha = 0;
+                categoryAxis.fillAlpha = 1;
+                categoryAxis.fillColor = "#FAFAFA";
+                categoryAxis.gridPosition = "start";
+			 
+
+                // value
+                var valueAxis = new AmCharts.ValueAxis();
+                valueAxis.dashLength = 5;
+                valueAxis.title = "Total Traffic of Each Day";
+                valueAxis.axisAlpha = 0;
+                bargraph_chart.addValueAxis(valueAxis);
+				
+				 
+
+                // GRAPH
+                var graph = new AmCharts.AmGraph();
+                graph.valueField = "traffic_count";
+                graph.colorField = "color";
+                graph.balloonText = "<b>[[category]]: [[value]]</b>";
+                graph.type = "column";
+                graph.lineAlpha = 0;
+                graph.fillAlphas = 1;
+                bargraph_chart.addGraph(graph);
+				
+				 
+
+                // CURSOR
+                chartCursor = new AmCharts.ChartCursor();
+                chartCursor.cursorAlpha = 0;
+                chartCursor.zoomable = false;
+                chartCursor.categoryBalloonEnabled = false;
+                bargraph_chart.addChartCursor(chartCursor);
+
+                bargraph_chart.creditsPosition = "top-right";
+				
+				 
+                
+              
+				
+				 
+
+
+   
+  
+        var geocoder = new google.maps.Geocoder();
+       var address = document.getElementById("searchlocation").value;
+	   var  startDate=document.getElementById("startDate").value;
+	   var  endDate=document.getElementById("endDate").value;
+	   
+	   
+	   
+    
+    geocoder.geocode( { 'address': address}, function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+         
+		 
+		 var latitiude=results[0].geometry.location.lat();
+		 var longitiude=results[0].geometry.location.lng();
+         
+		 
+
+		 var url="/adminpanel/trafficfindbydatetime?lat="+latitiude+"&lon="+longitiude+"&startdate="+startDate+"&enddate="+endDate;
+		 
+		 
+		 $.getJSON(url,function(result){
+		 
+			 bargraph_chartData=[];
+			 
+			 
+			 if (result.result_dateByTraffic.length == 0 ){
+				 
+				alert("No  Data Found our System")
+				 
+			 }else{
+			 
+			for(key in result.result_dateByTraffic){
+			  
+					bargraph_ele={
+					"Date": result.result_dateByTraffic[key].date,
+					"traffic_count": result.result_dateByTraffic[key].count,
+					"color": "#9ACD32",
+					 
+					
+				};
+				
+				
+				 
+			   bargraph_chartData.push(bargraph_ele);
+			}
+			 
+			
+			 
+			 bargraph_chart.dataProvider = bargraph_chartData;
+			 //write
+			bargraph_chart.write("map");
+			bargraph_chartData.validateData();
+		    
+		    
+			 }
+            });
+		  
+			 
+      } else {
+       alert("Invalid Location typing,this not in google map : " + status);
+     }
+    }); 
+	}
+
+
+</script>	
+	
+<script>
+	 var line_chart,line_chartCursor,line_ele1;	
+     var line_chartData = [];
+	 
+	  var trafficAvrage=0;
+      var totTraffic=0;
+      var key=0;
+	 
+	 function lineGraphbySpecficCondition(){
+        //div  clear
+        
+		$( ".map_panel" ).empty();
+ 
+        line_chart = new AmCharts.AmSerialChart();
+        line_chart.pathToImages = "static/images/graphImages/";  
+        line_chart.dataProvider = line_chartData;
+        line_chart.categoryField = "Date";
+        line_chart.dataDateFormat = "YYYY-MM-DD";
+				
+	    
+	    
+             // AXES
+            // category
+        var categoryAxis = line_chart.categoryAxis;
+        categoryAxis.parseDates = true; // as our data is date-based trafffic, we set parseDates to true
+        categoryAxis.minPeriod = "DD"; // our data is daily, so we set minPeriod to DD 
+        categoryAxis.dashLength = 1;
+        categoryAxis.gridAlpha = 0.15;
+        categoryAxis.axisColor = "#DADADA";
+				
+	     
+
+             // value
+          var valueAxis = new AmCharts.ValueAxis();
+          valueAxis.axisColor = "#DADADA";
+          valueAxis.dashLength = 1;
+          valueAxis.logarithmic = true; // this line makes axis logarithmic
+          line_chart.addValueAxis(valueAxis);
+				
+           
+		   
+
+              // GUIDE for average
+            var guide = new AmCharts.Guide();
+            guide.value = trafficAvrage;
+            guide.lineColor = "#CC0000";
+            guide.dashLength = 4;
+            guide.label = "Traffic average";
+            guide.inside = true;
+            guide.lineAlpha = 1;
+            valueAxis.addGuide(guide);
+				
+		 
+
+
+             // GRAPH
+             var graph = new AmCharts.AmGraph();
+             graph.type = "smoothedLine";
+             graph.bullet = "round";
+             graph.bulletColor = "#FFFFFF";
+             graph.useLineColorForBulletBorder = true;
+             graph.bulletBorderAlpha = 1;
+             graph.bulletBorderThickness = 2;
+             graph.bulletSize = 7;
+             graph.title = "Row Traffic";
+             graph.valueField = "traffic_count";
+             graph.lineThickness = 2;
+             graph.lineColor = "#00BBCC";
+             line_chart.addGraph(graph);
+				
+		   
+
+               // CURSOR
+             var line_chartCursor = new AmCharts.ChartCursor();
+             line_chartCursor.cursorPosition = "mouse";
+             line_chart.addChartCursor(line_chartCursor);
+				
+		      
+                // SCROLLBAR
+                var chartScrollbar = new AmCharts.ChartScrollbar();
+                chartScrollbar.graph = graph;
+                chartScrollbar.scrollbarHeight = 30;
+                line_chart.addChartScrollbar(chartScrollbar);
+
+                line_chart.creditsPosition = "bottom-right";
+				
+				 
+  
+     
+            
+		 var geocoder = new google.maps.Geocoder();
+         
+		 var address = document.getElementById("searchlocation").value;
+	     var  startDate=document.getElementById("startDate").value;
+	     var  endDate=document.getElementById("endDate").value;
+         
+         geocoder.geocode( { 'address': address}, function(results, status) {
+         if (status == google.maps.GeocoderStatus.OK) {
+         
+		 
+        	 
+		 var latitiude=results[0].geometry.location.lat();
+		 var longitiude=results[0].geometry.location.lng();
+		 
+		 
+		   
+         
+		 
+		 //url creation
+		 
+		 var url="/adminpanel/trafficfindbydatetime?lat="+latitiude+"&lon="+longitiude+"&startdate="+startDate+"&enddate="+endDate;
+		 
+		 
+   
+		 
+		
+		 $.getJSON(url,function(result){
+		 
+			 line_chartData=[];
+			  
+			 if ( result.result_dateByTraffic.length == 0 ) {
+			        alert("No  Data Found our System")
+			    }else{
+			 
+			for(key in result.result_dateByTraffic){
+			  
+					line_ele1={
+					"Date": result.result_dateByTraffic[key].date,
+					"traffic_count": result.result_dateByTraffic[key].count,
+					 
+					 
+					
+				};
+				
+				
+				totTraffic+=result.result_dateByTraffic[key].count;
+				
+				 
+			   line_chartData.push(line_ele1);
+			}
+			key++;
+			trafficAvrage=totTraffic/(key);
+			
+			 
+			 guide.value = trafficAvrage;
+             line_chart.dataProvider = line_chartData;
+			
+			 
+			 line_chart.write("map");
+			 
+			 //adiing data to graph 
+			 line_chartData.validateData();
+			 
+			 
+		 }
+            });
+		  
+			 
+      } else {
+       alert("Invalid Location typing,this not in google map : " + status);
+     }
+    }); 
+	   
+	   
+	   
+	   
+    } 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function() {
+
+        //syntax highlighter
+        hljs.tabReplace = '    ';
+        hljs.initHighlightingOnLoad();
+
+        $.fn.slideFadeToggle = function(speed, easing, callback) {
+            return this.animate({opacity: 'toggle', height: 'toggle'}, speed, easing, callback);
+        };
+
+        //collapsible management
+        $('.collapsible').collapsible({
+            defaultOpen: 'section1',
+            cookieName: 'nav',
+            speed: 'slow',
+            animateOpen: function (elem, opts) { //replace the standard slideUp with custom function
+                elem.next().slideFadeToggle(opts.speed);
+            },
+            animateClose: function (elem, opts) { //replace the standard slideDown with custom function
+                elem.next().slideFadeToggle(opts.speed);
+            },
+            loadOpen: function (elem) { //replace the standard open state with custom function
+                elem.next().show();
+            },
+            loadClose: function (elem, opts) { //replace the close state with custom function
+                elem.next().hide();
+            }
+        });
+        $('.page_collapsible').collapsible({
+            defaultOpen: 'body_section1',
+            cookieName: 'body2',
+            speed: 'slow',
+            animateOpen: function (elem, opts) { //replace the standard slideUp with custom function
+                elem.next().slideFadeToggle(opts.speed);
+            },
+            animateClose: function (elem, opts) { //replace the standard slideDown with custom function
+                elem.next().slideFadeToggle(opts.speed);
+            },
+            loadOpen: function (elem) { //replace the standard open state with custom function
+                elem.next().show();
+            },
+            loadClose: function (elem, opts) { //replace the close state with custom function
+                elem.next().hide();
+            }
+
+        });
+
+        //assign open/close all to functions
+        function openAll() {
+            $('.page_collapsible').collapsible('openAll');
+        }
+        function closeAll() {
+            $('.page_collapsible').collapsible('closeAll');
+        }
+
+        //listen for close/open all
+        $('#closeAll').click(function(event) {
+            event.preventDefault();
+            closeAll();
+
+        });
+        $('#openAll').click(function(event) {
+            event.preventDefault();
+            openAll();
+        });
+
+    });
+</script> 
+<!-- /JS -->
+
+<!--sp scrtpts--------------------------->
+
+<script type="text/javascript">
+	function load_markers_data_ajax() {
+
+		var latitude = $('input[name=lat]').val();
+		var longitude = $('input[name=lon]').val();
+		var markerID = document.getElementById ( "markerid" ).value;
+		var Radius = $('input[name=radius]').val();
+
+		markerId = markerID -1;
+		
+		
+		
+		if (Radius ==''){
+			Radius=0;
+		}
+		
+		if(latitude =='' || longitude ==''){
+			latitude=0;
+			longitude=0;
+		}
+		
+		
+		var url = "/markersCALL?lat="+latitude+"&lon="+longitude+"&markerid="+markerId+"&radius="+Radius;
+
+
+		
+		$
+				.getJSON(
+						url,
+						function(result) {
+				
+							var content = '<div><table><thead><tr><th>Marker</th><th>Latitude</th><th>Longitude</th></tr></thead><tbody>';
+							
+							var key=0;
+							
+							for ( key in result.results) {
+								
+								content += '<tr><td>'
+										+ result.results[key].Marker
+										+ '</td><td>'
+										+ result.results[key].Location[0]
+										+ '</td><td>'
+										+ result.results[key].Location[1]
+										+ '</td></tr>';
+							}
+							content += "</tbody></table></div>"
+
+							$('#map').empty();
+							if(key>0)
+							{
+							$('#map').append(content);
+							}
+							else
+							{
+							alert('No Matching Markers');
+							}
+							
+						});
+		
+
+	}
+</script>
+
+<script type="text/javascript">
+	function load_device_data_ajax() {
+
+		var manufacturer = $('input[id=manu]').val();
+		var model = $('input[id=model]').val();
+		var version = $('input[id=ver]').val();
+
+		var url = "/deviceDataCALL?manu="+manufacturer+"&model="+model+"&ver="+version;
+
+
+		
+		$
+				.getJSON(
+						url,
+						function(result) {
+				
+							var content = '<div><table><thead><tr><th>Manufacturer</th><th>Model</th><th>Version</th></tr></thead><tbody>';
+							
+							var key=0;
+							
+							for (key in result.results) {
+								
+								content += '<tr><td>'
+										+ result.results[key].manufacturer
+										+ '</td><td>'
+										+ result.results[key].model
+										+ '</td><td>'
+										+ result.results[key].version
+										+ '</td></tr>';
+							}
+							content += "</tbody></table></div>"
+							
+							$('#map').empty();
+							if(key>0)
+							{
+							$('#map').append(content);
+							}
+							else
+							{
+							alert('No Matching Devices');
+							}
+							
+						});
+		
+
+	}
+</script>
+
+
+<script type="text/javascript">
+	function add_markers_data_ajax() {
+
+		var latitude = $('input[name=lat]').val();
+		var longitude = $('input[name=lon]').val();
+		var markerID = document.getElementById ( "markerid" ).value;
+		
+	
+		
+			
+		if (latitude == '' || longitude == '' || markerID == 0)
+		{
+		alert('Please Fill location and markerid to Add the marker correctly!');
+		}
+	
+		
+		else{
+		
+		
+
+		var url = "v1/insertmarkers?lat="+ latitude + "&lon=" + longitude + "&markerid=" + markerID;
+
+
+		
+		$
+				.getJSON(
+						url,
+						function(result) {
+				
+							if(result.result=='success' || result.result=='rejected'){
+								alert('Marker Added Successfully......!');
+								add_markers_forstatics_ajax();
+							}
+							
+						});
+		
+		}
+		
+		
+		
+		
+		}
+		
+	
+	function add_markers_forstatics_ajax() {
+
+		var latitude = $('input[name=lat]').val();
+		var longitude = $('input[name=lon]').val();
+		var markerID = document.getElementById ( "markerid" ).value;
+
+	
+		var url = "adminpanel/markerstatictics?lat="+ latitude + "&lon=" + longitude + "&markerid=" + markerID;
+
+
+		
+		$
+				.getJSON(
+						url,
+						function(result) {
+				
+							if(result.result=='success'){
+								//alert('Marker Added Successfully');
+							}
+							
+						});
+		
+	
+
+	}
+</script>
+
+<script type="text/javascript">
+	function delete_markers_data_ajax() {
+
+		var latitude = $('input[name=lat]').val();
+		var longitude = $('input[name=lon]').val();
+		var markerID = document.getElementById ( "markerid" ).value;
+
+		
+		
+		if (latitude == '' || longitude == '' || markerID == 0)
+		{
+		alert('Please Fill location and markerid to Add the marker correctly!');
+		}
+		
+		else{
+		
+		var url = "v1/deletemarkers?lat="+ latitude + "&lon=" + longitude + "&markerid=" + markerID;
+
+
+		
+		$
+				.getJSON(
+						url,
+						function(result) {
+				
+							if(result.result=='success'){
+								alert('Marker Deleted Successfully......!');
+							}
+							else{
+								alert('Marker does not exist...!');
+							}
+						});
+		
+		}
+
+	}
+</script>
+
+<script type="text/javascript">
+	function load_traffic_data_ajax() {
+
+	
+
+		var url = "adminpanel/loadtraffic";
+
+
+		
+		$
+				.getJSON(
+						url,
+						function(result) {
+				
+							var content = '<div><table><thead><tr><th>Latitude</th><th>Longitude</th><th>Time</th><th>Date</th><th>Speed</th></tr></thead><tbody>';
+							
+							var key=0;
+							
+							for (key in result.results) {
+								
+								content += '<tr><td>'
+										+ result.results[key].location[0]
+										+ '</td><td>'
+										+ result.results[key].location[1]
+										+ '</td><td>'
+										+ result.results[key].time
+										+ '</td><td>'
+										+ result.results[key].date
+										+ '</td><td>'
+										+ result.results[key].speed
+										+ '</td></tr>';
+							}
+							content += "</tbody></table></div>"
+
+							$('#map').empty();
+							if(key>0)
+							{
+							$('#map').append(content);
+							}
+							else
+							{
+							alert('No Traffic data');
+							}
+							
+						});
+		
+
+	}
+</script>
+
+<script type="text/javascript">
+	function load_markers_statictics_ajax() {
+
+		
+
+		var url = "/adminpanel/loadmarkerstatictics";
+
+
+		
+		$
+				.getJSON(
+						url,
+						function(result) {
+				
+							var content = '<div><table><thead><tr><th>Latitude</th><th>Longitude</th><th>Car Accident</th><th>Police</th><th>Traffic Camera</th><th>Tree Down</th></tr></thead><tbody>';
+							
+							for ( var key in result.results) {
+								
+								content += '<tr><td>'
+										+ result.results[key].Location[0]
+										+ '</td><td>'
+										+ result.results[key].Location[1]
+										+ '</td><td>'
+										+ result.results[key].CarAccident
+										+ '</td><td>'
+										+ result.results[key].Police
+										+ '</td><td>'
+										+ result.results[key].TrafficCamera
+										+ '</td><td>'
+										+ result.results[key].TreeDown
+										+ '</td></tr>';
+							}
+							content += "</tbody></table></div>"
+
+							$('#map').empty();
+							$('#map').append(content);
+							
+						});
+		
+
+	}
+</script>
+<!--End SP Scripts------------------------------->
+
+<!--nuwan Scripts------------------------------->
+
+	<script type='text/javascript'>//madhura scripts///////////////////////////////////////////////////////
+		var current_maptype='google'
+	
+		var map;
+		$(document).ready(function(){
+			showMap('google');
+		});
+		
+		function showMap(type){
+		
+			if(type=='google'){
+				map = new L.Map('map', {center: new L.LatLng(6.91518, 79.97244), zoom: 16});
+				var googleLayer = new L.Google('ROADMAP');
+				map.addLayer(googleLayer);
+			}else{
+				map = L.map('map').setView([6.91518, 79.97244], 16);
+				L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+					attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+				}).addTo(map);
+			}
+			
+			var popup = L.popup();
+
+			function onMapClick(e) {
+				if ($('input[name=chk_focuss]:checked').length > 0) {
+					document.getElementById("txtLat1").value=e.latlng['lat'];
+					document.getElementById("txtLon1").value=e.latlng['lng'];
+				}else{
+					document.getElementById("txtLat2").value=e.latlng['lat'];
+					document.getElementById("txtLon2").value=e.latlng['lng'];
+				}
+			
+			popup
+				.setLatLng(e.latlng)
+				.setContent("Location : " + e.latlng.toString())
+				.openOn(map);
+				document.getElementById("txtLat1").value=e.latlng['lat'];
+				document.getElementById("txtLon1").value=e.latlng['lng'];
+			}
+			map.on('click', onMapClick);
+		}
+		
+		
+		
+
+	
+	function drawRoute(){
+		var slat=document.getElementById("txtLat1").value;
+		var slon=document.getElementById("txtLat1").value;
+		var elat=document.getElementById("txtLat2").value;
+		var elon=document.getElementById("txtLat2").value;
+		var url="/adminpanel/getroutelist?slat="+slat+"&slon="+slon+"&elat="+elat+"&elon="+elon;
+		var polyline;
+		$.getJSON(url,function(result){
+			polyline = L.Polyline.fromEncoded(result.results[0],{
+				weight: 10,
+				color: '#f30'
+				}).addTo(map);
+			map.fitBounds(polyline.getBounds());
+			
+		});	
+	}
+	
+	function drawTrafficFromInputs(){
+		var lat=document.getElementById("txtLat1").value;
+		var lon=document.getElementById("txtLon1").value;
+		drawTraffic(lat,lon);
+	}
+	
+	function drawTraffic(lat,lon){
+	alert("in drawtraffic");
+		var url="/v2/retrievetraffic?lat="+lat+"&lon="+lon;
+		$.getJSON(url,function(result){
+			var polyline;
+			for(var key in result.results) {
+				for(var key2 in result.results[key].roads){
+					var encoded_road=result.results[key].roads[key2];
+					var avgspeed=result.results[key].avgspeed;
+					var density=result.results[key].density;
+					var hexaCplor='#FF0000';
+					if(avgspeed<10){
+						hexaCplor='#FF0000';
+					}else if(avgspeed<20){
+						hexaCplor='#FF6600';
+					}else if(avgspeed<30){
+						hexaCplor='#FFCC00';
+					}else if(avgspeed<40){
+						hexaCplor='#00CC00';
+					}else if(avgspeed<50){
+						hexaCplor='#009900';
+					}else if(avgspeed<60){
+						hexaCplor='#006600';
+					}
+					polyline = L.Polyline.fromEncoded(encoded_road,{
+						weight: 8,
+						color: hexaCplor
+					}).addTo(map);
+				}
+			}
+			//map.fitBounds(polyline.getBounds());
+		});
+	}
+	
+	
+	function drawMarkersFromInputs(){
+		var lat=document.getElementById("txtLat1").value;
+		var lon=document.getElementById("txtLon1").value;
+		drawMarkers(lat,lon);
+	}
+	
+	function drawMarkers(lat,lon){
+		var url="/adminpanel/getmarkers?lat="+lat+"&lon="+lon;
+		$.getJSON(url,function(result){
+			for(var key in result.results){
+				var markerId=result.results[key].Marker;
+				var markerImg;
+				if(markerId==1){
+					markerImg="static/images/caraccident.png";
+				}else if(markerId==2){
+					markerImg="static/images/police.png";
+				}else if(markerId==3){
+					markerImg="static/images/trafficcamera.png";
+				}else if(markerId==4){
+					markerImg="static/images/treedown.png";
+				}
+				var myIcon = L.icon({
+					iconUrl: markerImg,
+					iconSize: [42, 47],
+				});
+				L.marker([result.results[key].Location[0], result.results[key].Location[1]], {icon: myIcon}).addTo(map);
+			}
+		});
+	}
+	
+	function geocodeAddress() {
+		var geocoder = new google.maps.Geocoder();
+		var address = document.getElementById("addr").value;
+		geocoder.geocode( { 'address': address}, function(results, status) {
+		  if (status == google.maps.GeocoderStatus.OK) {
+			 map.setView([results[0].geometry.location.lat(), results[0].geometry.location.lng()], 16);
+		  }
+		});
+	}
+	
+	function drawDensityFromInputs(){
+		var lat=document.getElementById("txtLat1").value;
+		var lon=document.getElementById("txtLon1").value;
+		drawDensity(lat,lon,lat,lon);
+	}
+	
+	function drawDensity(slat,slon,elat,elon){
+		var url="/adminpanel/gettrafficdensity?slat=6.9084&slon=79.96762&elat=6.90331&elon=79.95575";
+		$.getJSON(url,function(result){
+			for(var key in result.results){
+				var radius=500;
+				var hexaColor='#f03';
+				var color='red';
+				var density=result.results[key].density;
+				if(density<10){
+					radius=50;
+				}else if(density<500){
+					radius=density;
+				}
+				var circle = L.circle([result.results[key].location[0],result.results[key].location[1]], radius, {
+					color: hexaColor,
+					fillColor: hexaColor,
+					fillOpacity: 0.5
+				}).addTo(map);
+				circle.bindPopup("density: "+density);
+			}
+		});	
+	}
+	
+	function clearAll(){
+		map.clearLayers();
+	}
+</script>
+
+<!--End nuwan Scripts------------------------------->
+
+<!--forecasting scripts--------->
+
+<script type="text/javascript">
+	 var expontial_ele;
+     var expontial_chartData = [];
+	
+	 function ExpontialForecasting(){
+	    
+		 expontial_chartData=[];
+		 var geocoder = new google.maps.Geocoder();
+         var address = document.getElementById("location_forecast").value;
+		
+		 
+		 
+	   geocoder.geocode( { 'address': address}, function(results, status) {
+              if (status == google.maps.GeocoderStatus.OK) {
+                
+                
+                var latitiude=results[0].geometry.location.lat();
+                var longitiude=results[0].geometry.location.lng();
+               
+                  
+                generateDataforexpontioal(latitiude,longitiude);
+	   } else {
+           alert("Invalid Location typing,this not in google map : " + status);
+         }
+           
+        }); 
+	 }
+	
+	 function zoomChart(){
+		    chart.zoomToIndexes(chart.dataProvider.length - 20, chart.dataProvider.length - 1);
+		}
+
+	 
+	 function generateDataforexpontioal(lati,longi) {
+		    
+		  
+        
+		 
+         var url="/adminpanel/forecastbyexpontial?lat="+lati+"&lon="+longi;
+         //var url="/adminpanel/forecastbyexpontial";
+         
+         $.getJSON(url,function(result){
+             
+             if (result.result_forecast.length == 0 ){
+                 
+                alert("No  Data Found our System")
+                 
+             }else{
+             
+                  
+            for(key in result.result_forecast){
+              
+                 
+                
+                expontial_ele={
+                    "date": result.result_forecast[key].forecastDate,
+                    "traffic_count": result.result_forecast[key].orginalcount,
+                    "Forecast_Value": result.result_forecast[key].forecast
+                      
+                    
+                };
+                
+                
+                expontial_chartData.push(expontial_ele);
+                
+            }
+             
+            var chart = AmCharts.makeChart("map", {
+       	     "type": "serial",
+       	     "theme": "none",
+       	     "pathToImages": "http://www.amcharts.com/lib/3/images/",
+       	     "legend": {
+       	         "useGraphSettings": true
+       	     },
+       	     "dataProvider": expontial_chartData,
+       	     "valueAxes": [{
+       	         "id":"v1",
+       	         "axisColor": "#FF6600",
+       	         "axisThickness": 2,
+       	         "gridAlpha": 0,
+       	         "axisAlpha": 1,
+       	         "position": "left"
+       	     }],
+       	     "graphs": [{
+       	         "valueAxis": "v1",
+       	         "lineColor": "#FF6600",
+       	         "bullet": "round",
+       	         "bulletBorderThickness": 1,
+       	         "hideBulletsCount": 30,
+       	         "title": "Real Traffic ",
+       	         "valueField": "traffic_count",
+       	 		"fillAlphas": 0
+       	     }, {
+       	         "valueAxis": "v2",
+       	         "lineColor": "#FCD202",
+       	         "bullet": "square",
+       	         "bulletBorderThickness": 1,
+       	         "hideBulletsCount":30,
+       	         "title": "Forecasting Traffic",
+       	         "valueField": "Forecast_Value",
+       	 		"fillAlphas": 0
+       	     }],
+       	     "chartScrollbar": {},
+       	     "chartCursor": {
+       	         "cursorPosition": "mouse"
+       	     },
+       	     "categoryField": "date",
+       	     "categoryAxis": {
+       	         "parseDates": true,
+       	         "axisColor": "#DADADA",
+       	         "minorGridEnabled": true
+       	     }
+       	 });
+
+       	 chart.addListener("dataUpdated", zoomChart);
+       	 zoomChart();
+            
+            
+            
+            
+            
+             }
+            });
+		 
+         
+		}
+		
+		  
+	
+	</script>
+	
+    <script>
+    
+    var holt_ele;
+    var holt_chartData = [];
+    
+     function Holtmethodforecasting(){
+    	 
+    	 
+    	var Forecastdays = document.getElementById("how_many_days").value;
+    	var locationName= document.getElementById("holt_location").value;
+     
+    	holt_chartData= [] ;
+    	checkDays(Forecastdays,locationName);  
+    	 
+    	 
+     }
+    
+     function checkDays(inputday,locName)  
+     {  
+    	 
+    	 
+        var numbers = /^[0-9]+$/;  
+        if(inputday.match(numbers) && inputday > 0 )  
+        {  
+        	 var geocoder = new google.maps.Geocoder();
+             geocoder.geocode( { 'address': locName}, function(results, status) {
+                  if (status == google.maps.GeocoderStatus.OK) {
+                    
+                    
+                    var latitiude=results[0].geometry.location.lat();
+                    var longitiude=results[0].geometry.location.lng();
+                   
+    		        
+                    holt_method_dataload(latitiude,longitiude,inputday);
+    	   } else {
+               alert("Invalid Location typing,this not in google map : " + status);
+             }
+               
+            }); 
+         
+        return true;  
+        }  
+        else  
+        {  
+        alert('Please Input the Numeric Value and it must be postive');  
+          
+        return false;  
+        }  
+     }  
+   
+    
+     function holt_method_dataload(lat,lon,daycount){
+    	  
+    	 
+    	var url="/adminpanel/forecastbyholt?lat="+lat+"&lon="+lon+"&countday="+daycount;
+    	
+    	 
+    	$.getJSON(url,function(result){
+            
+            
+            if (result.result_forecastbyholt.length == 0 ){
+                
+               alert("No  Data Found our System");
+                
+            }else{
+            
+                
+           for(key in result.result_forecastbyholt){
+             
+               
+               
+               holt_ele={
+                   "date": result.result_forecastbyholt[key].forecastDate,
+                   "traffic_count": result.result_forecastbyholt[key].trafficcount,
+                   "Forecast_Value": result.result_forecastbyholt[key].smothingValue
+                     
+                   
+               };
+               
+                 
+                holt_chartData.push(holt_ele);
+               
+           }
+            
+           
+           var chart = AmCharts.makeChart("map", {
+         	     "type": "serial",
+         	     "theme": "none",
+         	     "pathToImages": "http://www.amcharts.com/lib/3/images/",
+         	     "legend": {
+         	         "useGraphSettings": true
+         	     },
+         	     "dataProvider": holt_chartData,
+         	     "valueAxes": [{
+         	         "id":"v1",
+         	         "axisColor": "#FF6600",
+         	         "axisThickness": 2,
+         	         "gridAlpha": 0,
+         	         "axisAlpha": 1,
+         	         "position": "left"
+         	     }],
+         	     "graphs": [{
+         	         "valueAxis": "v1",
+         	         "lineColor": "#FF6600",
+         	         "bullet": "round",
+         	         "bulletBorderThickness": 1,
+         	         "hideBulletsCount": 30,
+         	         "title": "Real Traffic ",
+         	         "valueField": "traffic_count",
+         	 		"fillAlphas": 0
+         	     }, {
+         	         "valueAxis": "v2",
+         	         "lineColor": "#FCD202",
+         	         "bullet": "square",
+         	         "bulletBorderThickness": 1,
+         	         "hideBulletsCount":30,
+         	         "title": "Forecasting Traffic",
+         	         "valueField": "Forecast_Value",
+         	 		"fillAlphas": 0
+         	     }],
+         	     "chartScrollbar": {},
+         	     "chartCursor": {
+         	         "cursorPosition": "mouse"
+         	     },
+         	     "categoryField": "date",
+         	     "categoryAxis": {
+         	         "parseDates": true,
+         	         "axisColor": "#DADADA",
+         	         "minorGridEnabled": true
+         	     }
+         	 });
+
+         	 chart.addListener("dataUpdated", zoomChart);
+         	 zoomChart();
+               
+           
+           
+            }
+           });
+    	
+    	
+     
+    	 
+     }
+     
+     function zoomChart(){
+		    chart.zoomToIndexes(chart.dataProvider.length - 20, chart.dataProvider.length - 1);
+		}
+
+     
+  
+     
+    </script>
+    
+
+ 
+
+
+</head>
+ <body onload="load()">
+
+
+ 
+ 
+ 
+  <div id="mainblock">
+  
+     <div id="innerblock">
+
+        <div id="toppanel">
+	       
+		  <div class="Header_Topics">	 
+	       <img src="static/images/thadabadayasitelogo.png" alt="#" title="" />
+	       <p span class="loggedline"> <h5> logged as : {{name1}} </h5></p>
+	       <a href ="http://trafficmonitor-cbtms.rhcloud.com/adminlogin">Logout</a>
+		   </div>
+		    
+		    
+		  	
+        </div> <!--end of the top panel div !-->
+	 
+	 
+	 
+	  <div class="container_data">
+	  
+	    <div class="right_panel">
+              
+           <div class="navigation_pages">
+		   
+		     <div id="content">
+		     <!-- collapsible -->
+    <div class="page_collapsible collapse-close" id="body-section4">Map<span></span></div>
+    <div class="container" style="display: none;">
+        <div class="content" >
+		
+		Origin
+		<input type="radio" name="chk_focuss" value="checked">
+	<br></br>
+	<input type="text" id="txtLat1" ></input>
+	<input type="text" id="txtLon1" ></input>
+	<br></br>
+	Destination
+		<input type="radio" name="chk_focuss" >
+	<br></br>
+	<input type="text" id="txtLat2" ></input>
+	<input type="text" id="txtLon2" ></input>
+	<br></br>
+	
+	<button id="btnRoutes"  onClick="drawRoute()">Draw Route</button>
+	<button id="btnDrawTraffic" onClick="drawTrafficFromInputs()">Draw Traffic</button>
+	<button id="btnDrawMarkers" onClick="drawMarkersFromInputs()">Draw Markers</button>
+	
+	</br>
+	</br>
+	
+	<button id="btnClearAll" onClick="showMap(current_maptype)">Clear All</button>
+	<button id="btnDensity" onClick="drawDensityFromInputs()">Traffic Density</button>
+	 
+	<div id="images"></div>
+	<br></br>
+	<input type="text" id="addr" ></input>
+	<button id="btnTest" onClick="geocodeAddress()">Goto</button>
+	<div id="images"></div>
+		
+        </div>
+    </div>
+    <!-- end collapsible -->
+
+    <!-- collapsible -->
+    <div class="page_collapsible collapse-close" id="body-section2">Statistics<span></span></div>
+    <div class="container" style="display: none;">
+        <div class="content">
+		 
+		   <p span class="searchloc"><b>Filtering Traffic With  Specific Condition</b></p>
+		   </br>
+		    <p>Enter the Start Date,Time :</p>
+		    
+		     <input type="datetime-local" name="startDate"  id="startDate"><br>
+		    
+           <p>Enter the End Date:</p>
+           
+              <input type="datetime-local" name="endDate"  id="endDate">
+             <p span class="searchloc">Enter the Location Name :</p>
+	  	     <input type="text"  name="searchlocation" id="searchlocation" />
+	  	     </br>
+	  	    
+	  	    
+	  	   <p span class="bargrphbutton"><button id="findtrafficBargraph" onclick="BarGraphwithSpecficCondition()">Bar Graph</button></p>
+	  	  <div class="linegraphbutton">
+		   <button id="findtrafficlinegraph" onclick="lineGraphbySpecficCondition()">Line Graph</button>
+		   </div>
+		   
+		   
+		   </br>
+		   
+		   <p span class="searchloc"><b>Traffic Filtering with  All  Dates</b></p>
+		   </br>
+           <p span class="searchloc">Enter the Location Name :</p>
+		   <input type="text"  name="location" id="location" />
+		     <button id="btnbargrph" onclick="BarGraph()">Bar Graph</button>
+		  
+		   <br></br>
+		     <input type="text"  name="line_location" id="line_location"/>
+		     <button id="btnloggraph" onclick="lineGraph()">Line Graph</button>
+		   </br>
+		   </br>
+		   <a href="javascript:registerd_PhoneModels();">Registered Models</a>
+        </div>
+    </div>
+    <!-- end collapsible -->
+    <!-- collapsible -->
+    <div class="page_collapsible collapse-close" id="body-section3">Database<span></span></div>
+    <div class="container" style="display: none;">
+        <div class="content">
+            
+					<div class="form1">
+			
+			 <p class="latitude">
+
+												<label for="latitude">Latitude</label>
+												  <input type="text"	name="lat" id="lat"  />
+												  
+											</p>
+
+											<p class="longitude">
+
+												<label for="longitude">Longitude</label> 
+												<input type="text" name="lon" id="lon" />
+											</p>
+
+											<p class="markerid">
+
+												<label for="markerid">Marker ID</label>
+												<select name="markerid" id="markerid">
+												        <option value="0"></option>
+														<option value="1">Car Accident</option>
+														<option value="2">Police</option>
+														<option value="3">Traffic Camera</option>
+														<option value="4">Tree Down</option>
+												</select>
+											
+												<!-- 
+												<input type="text"  name="markerid" id="markerid" />-->
+											</p>
+
+											<p class="radius">
+
+												<label for="radius">Radius</label> 
+												<input type="text" name="radius" id="radius" />
+											</p>
+			
+			
+			<button id="btnRoutes" onClick="load_markers_data_ajax()">Find</button> 
+
+<button id="btndevices" onClick="add_markers_data_ajax()">Add Marker</button> 
+<button id="btndevices" onClick="delete_markers_data_ajax()">Delete Marker</button> 
+</br>
+</br>
+<button id="btndevices" onClick="load_markers_statictics_ajax()">View Marker's Statictics</button> 
+	
+			<br/>
+			<br/>
+			
+			</div>
+			
+			
+			<div class="form2">
+			<br/>
+			<br/>
+			
+			<p class="manu">
+
+												<label for="manufacturer">Manufacturer</label>
+												 <input type="text"	name="manu" id="manu" />
+											</p>
+
+											<p class="model">
+
+												<label for="model">Model</label> 
+												<input type="text" name="model" id="model" />
+											</p>
+
+											<p class="version">
+
+												<label for="version">Version</label> 
+												<input type="text"  name="version" id="ver" />
+											</p>
+											
+											<button id="btndevices" onClick="load_device_data_ajax()">Search</button>
+											<button id="btndevices" onClick="load_traffic_data_ajax()">View Traffic Data</button>
+			
+			
+			</div>
+			
+			 
+     
+        </div>
+    </div>
+    <!-- end collapsible -->
+    
+			     <!-- collapsible -->
+				 {%if 'login' in session%}
+    <div class="page_collapsible collapse-close" id="body-section1">User Management<span></span></div>
+    <div class="container" style="display: none;">
+        <div class="content">
+		<div id="add">
+		 <br>
+         <a href= "/register" target="_newtab" >Add New Admins</a>
+		 </br>
+		 </div>
+		 <div id="update">
+		 <br>
+		 <a href= "/update" target="_newtab" >My Profile</a>
+		 </br>
+		 </div>
+		 <div id="view">
+		 <br>
+		 <a href= "/view" target="_newtab" >View Admins</a>
+		 </br>
+		 </div> 
+        </div>
+		{%endif%}
+    </div>
+    <!-- end collapsible -->
+      <div class="page_collapsible collapse-close" id="body-section2">Forecasting<span></span></div>
+    <div class="container" style="display: none;">
+        <div class="content">
+		  
+		   <p><b>Exponential Smoothing Algorithm </b></p>
+		   
+           <p span class="searchloc">Enter the Location Name :</p>
+		   <input type="text"  name="location_forecast" id="location_forecast" />
+		     <button id="btnexponital" onclick="ExpontialForecasting()">Forecast</button>
+		   
+		   <br></br>
+		    <p><b>Holt Algorithm </b></p>
+		     <p span class="searchloc">Enter the Location Name :</p>
+		     <input type="text"  name="holt_location" id="holt_location"/>
+		     </br>
+		     <P span class="searchloc">Enter the Forecasting Days : </P>
+		     <input type="number" name="how_many_days"  id="how_many_days" min="1" max="30" >
+		     </br>
+		     </br>
+		     <button id="btnholt" onclick="Holtmethodforecasting()">Forecast</button>
+		   </br>
+		   </br>
+		      
+			 
+        </div>
+    </div>
+	
+	
+	
+	
+	
+	
+	
+	</div>	    
+		   
+ 
+		   </div>
+	   
+	   
+	 </div><!--end of the container div !-->
+	 <div class="map_panel" id="map">
+	   
+	   
+	    
+	   
+	   
+	   
+	   </div>
+	 
+	<div class="footer">
+	 
+	 <p>All Rights are Reserved </p>
+	 
+	 </div>
+     </div>
+</body>
+</html>

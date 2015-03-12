@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<link rel="stylesheet" href="static/tables.css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+
+ $(document).on('click', 'button.removebutton', function () {
+     
+	 var bid = this.id; 
+	
+	 $.ajax({
+					'url' : "/delete",
+                    'type' : 'POST', //GET or POST
+					'data' : {'tag' : bid},
+                    'success' : function(data){ 
+					
+					if(data.result='error')
+					{
+						
+						location.reload();
+					}
+					else
+					{
+						
+						location.reload();
+						//document.getElementById("container").innerHTML = data;
+                    }
+					}
+					
+					
+               });
+				
+     return false;
+ });
+
+
+
+</script>
+<script type="text/javascript">
+
+
+</script>
+<form method="post" action="">
+  
+	<table>
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Email</th>
+				<th>Phone_No</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+	  <tbody>
+		{% for item in mydata %}
+			<tr>
+				<td>{{item.name}}</td>
+				<td>{{item.email}}</td>
+				<td>{{item.pnumber}}</td>
+				<td><button id={{item.name}} name={{item.name}} type="delete" value={{item.name}} class="removebutton">Delete</button></td>
+				
+			</tr>
+		{% endfor %}
+	  </tbody>
+	</table>
+	<p>
+
+      
+     
+	</p>
+ <form>
+</html>
