@@ -30,18 +30,18 @@ app = Flask(__name__)
 app.secret_key="mnsgmnsgmnsgmnsg"
 TIMER_INTERVAL=60
 
-#owner madhura
+
 def timer():
     threading.Timer(TIMER_INTERVAL,timer).start()
     doInBackground()
 
-#owner shared
+
 def doInBackground():
     print (time.ctime()+" background processing")
     print bg_deletemarkers()
     test()
     
-#owner madhura
+
 def test():
     data = {"time":time.ctime()
            }
@@ -52,7 +52,7 @@ def test():
     #test.remove()
     regID=test.insert(data)
 
-#owner sp
+
 def bg_deletemarkers():
     
     client=MongoClient(Const.MONGODB_URL)
@@ -63,12 +63,11 @@ def bg_deletemarkers():
     return "removing expired markers"
     
 
-#owner shared
+
 @app.route("/")
 def def_welcome():
     return "<h1>You are welcome to Community based Traffic Monitoring System</h1></br>"
 
-#owner madhura
 @app.route("/v2/retrievetraffic")
 def def_retrieveTrafficv2():
     
@@ -78,7 +77,6 @@ def def_retrieveTrafficv2():
     result=t_density.calculateDensity(lat,lon)
     return json.dumps({'results': list(result)}, default=json_util.default);
 
-#owner madhura
 @app.route("/v1/registerapp")
 def def_registerApp():
     
@@ -99,7 +97,7 @@ def def_registerApp():
     
     return jsonify(key=str(regID))
 
-#owner madhura
+
 @app.route("/v1/inserttraffic")
 def def_insertTrafficData():
     
@@ -131,8 +129,7 @@ def def_insertTrafficData():
     
     return jsonify(result=presult);
 
-#owner madhura
-@app.route("/v1/retrievetraffictemp")
+#owner madhura@app.route("/v1/retrievetraffictemp")
 def def_retrieveTraffictemp():
     
     appid=request.args.get('appid')
@@ -161,7 +158,7 @@ def def_retrieveTraffictemp():
     return json.dumps({'results': list(tempdata)}, default=json_util.default);
 
 
-#owner madhura
+
 @app.route("/v1/retrievetraffic")
 def def_retrieveTraffic():
     
@@ -180,7 +177,7 @@ def def_retrieveTraffic():
     return json.dumps({'results': list(trafficdata)}, default=json_util.default);
 
 
-#owner madhura
+
 @app.route("/v1/retrievetrafficincircle")
 def def_retrieveTrafficInCircle():
     
@@ -198,7 +195,7 @@ def def_retrieveTrafficInCircle():
     return json.dumps({'results': list(trafficdata)}, default=json_util.default);
 
 
-#owner sp
+
 @app.route("/v1/retrievemarkers")
 def def_retrievemarkers():
     
@@ -218,7 +215,6 @@ def def_retrievemarkers():
 
 
 
-#owner madhura
 @app.route("/v1/removerawtraffic/<password>")
 def def_removeDBrawtraffic(password):
     if password=="madmadhuramad":
@@ -232,7 +228,6 @@ def def_removeDBrawtraffic(password):
     return jsonify(result=presult);
 
 
-#owner madhura
 @app.route("/v1/createmongoindex/<password>")
 def def_createGEOIndex(password):
     if password=="madmadhuramad":
@@ -245,7 +240,7 @@ def def_createGEOIndex(password):
         presult="failed"
     return jsonify(result=presult);
 
-#owner madhura
+
 @app.route("/v1/createmongoindex2/<password>")
 def def_createGEOIndex2(password):
     if password=="madmadhuramad":
@@ -259,7 +254,7 @@ def def_createGEOIndex2(password):
     return jsonify(result=presult);
 
 
-#madhura
+
 @app.route("/v1/viewalldata/<password>")
 def def_viewAllData(password):
     if password=="madmadhuramad":
@@ -270,7 +265,7 @@ def def_viewAllData(password):
         
     return json.dumps({'results': list(alldata)}, default=json_util.default);
 
-#madhura
+
 @app.route("/v1/inittestdata/<password>")
 def def_initTestData(password):
     if password=="madmadhuramad":
@@ -278,7 +273,7 @@ def def_initTestData(password):
         test.insertTestData()
     return json.dumps({'results': []}, default=json_util.default);
 
-#codes for admin pannel
+
 
 @app.route("/adminlogin",methods=['POST','GET'])
 def def_adminLogin():
@@ -546,7 +541,7 @@ def trafficdatewise():
     return json.dumps({'result_dateByTraffic':traffic}, default=json_util.default);
 
     
-#============================================ By  Gihan========================================
+
 
 
 @app.route("/adminpanel/trafficfindbydatetime", methods=['POST','GET'])
@@ -587,11 +582,9 @@ def trafficfindbydateandtime():
 
 
 
-#==================================================================================    
-    
 
-    
-#owner SP
+
+
 @app.route('/markersCALL', methods=["POST", "GET"])
 def load_markers_ajax(): 
     if request.method =='GET':
@@ -626,7 +619,7 @@ def load_markers_ajax():
         return json.dumps({'results':markersdatalist}, default=json_util.default);
 
 
-#owner SP
+
 @app.route('/deviceDataCALL', methods=["POST", "GET"])
 def load_devices_ajax():
    
@@ -667,7 +660,6 @@ def load_devices_ajax():
         return json.dumps({'results':devicedatalist}, default=json_util.default);
 
 
-#owner sp
 @app.route("/v1/insertmarkers")
 def def_insertmarkers():
 
@@ -724,7 +716,7 @@ def def_insertmarkers():
     return jsonify(result=presult);
 
 
-#owner sp
+
 @app.route("/v1/deletemarkers")
 def deletemarkers():
     
@@ -819,7 +811,6 @@ def def_loadmarkerstat():
     return json.dumps({'results': list(markerstats)}, default=json_util.default);
 
 
-#madhura
 @app.route("/adminpanel/getroutelist",methods=['POST','GET'])
 def def_getRouteList():
     sLat=float(request.args.get('slat'))
@@ -830,7 +821,7 @@ def def_getRouteList():
     return json.dumps({'results': pathlist}, default=json_util.default)
 
 
-#madhura
+
 @app.route("/v1/getroute")
 def def_getRoute():
     myLines = [
@@ -857,7 +848,6 @@ def def_foradminpanel_getmarkers():
     markersdata= db.markersTB.find({"Location": SON([("$near", [Lat, Lon]), ("$maxDistance", radius)])})
     return json.dumps({'results': list(markersdata)}, default=json_util.default);
 
-#madhura
 @app.route("/adminpanel/gettrafficdensity",methods=['POST','GET'])
 def def_gettrafficdensity():
     sLat=float(request.args.get('slat'))
@@ -896,11 +886,10 @@ def def_gettrafficdensity():
                 print result_elem
                 print row
                 result.append(result_elem)
-        #print result
+       
     return json.dumps({'results': list(result)}, default=json_util.default);
 
 
-#forecasting  section
 
 @app.route("/adminpanel/forecastbyexpontial", methods=['POST','GET'])
 def  def_trafficforecastingexponetial():
@@ -911,8 +900,7 @@ def  def_trafficforecastingexponetial():
         Lat= float(request.args.get('lat'))
         Lon= float(request.args.get('lon'))
         
-        #print Lat
-        #print Lon 
+       
         
       
     client=MongoClient(Const.MONGODB_URL)
@@ -937,7 +925,7 @@ def  def_trafficforecastingexponetial():
     
     print trafficdata
     
-    #=========================Expotinal Alogrithem===============================================
+   
     
     data_index=0
     forecastvalue=0;
@@ -995,7 +983,7 @@ def  def_trafficforecastingexponetial():
                   }
     forecast_contanier.append(forecastNext)
              
-    #======================================================
+   
  
 
  
@@ -1048,7 +1036,7 @@ def  def_trafficforecastingbyHoltmethod():
     trafficbydate = trafficdata.group(key,condition,initial,reduce)
     traffic=list(trafficbydate)
     
-    #================Implementing  Holt Method==========================
+   
     base=0
     trend=0
     alpha=0.2
@@ -1124,8 +1112,6 @@ def  def_trafficforecastingbyHoltmethod():
       no_of_day += 1
     
     
-    #======================================================
- 
  
     print forecast_contanier
     
